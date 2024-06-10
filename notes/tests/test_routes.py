@@ -55,6 +55,7 @@ class TestRoutes(TestCase):
                     self.assertEqual(response.status_code, status)
 
     def test_redirect_for_anonymous_client(self):
+        self.client.force_login(self.author)
         login_url = reverse('users:login')
         for name in ('notes:edit', 'notes:delete'):
             with self.subTest(name=name):
