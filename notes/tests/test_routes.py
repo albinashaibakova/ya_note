@@ -52,20 +52,11 @@ class TestRoutes(TestCase):
                     response = self.client.get(url)
                     self.assertEqual(response.status_code, status)
 
-
-
-
-
-    @skip
-    def test_home_page(self):
-        """Tests homepage is available for anonymous users"""
-        url = reverse('notes:home')
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, HTTPStatus.OK)
-
-    @skip
-    def test_note_detail_page(self):
-        """Tests note detail page"""
-        url = reverse('notes:detail', args=(self.note.slug,))
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, HTTPStatus.OK)
+    def test_redirect_for_anonymous_client(self):
+        login_url = reverse('yanote:login')
+        for name in ('notes:edit', 'notes:delete'):
+            with self.subTest(name=name):
+                url = reverse(name, args=(self.note.slug,))
+                redirect_url = f'{login_url}&next={url}'
+                response = self.client.get(url)
+                self.assertRedirects(response, redirect_url)
