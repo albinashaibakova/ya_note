@@ -15,11 +15,13 @@ class TestRoutes(TestCase):
 
     @classmethod
     def setUpTestData(cls):
+        cls.author = User.objects.create(username='Автор заметки')
+        cls.reader = User.objects.create(username='Читатель')
         cls.note = Note.objects.create(title='Заголовок',
                                        text='Текст',
                                        slug='Slug',
-                                       author = User.objects.create(username='Автор заметки'))
-        cls.reader = User.objects.create(username='Читатель')
+                                       author = cls.author)
+        
 
     def test_page_availability(self):
 
@@ -27,9 +29,9 @@ class TestRoutes(TestCase):
         urls = (
             ('notes:home', None),
             ('notes:detail', (self.note.slug,)),
-            ('yanote:login', None),
-            ('yanote:logout', None),
-            ('yanote:signup', None),
+            ('users:login', None),
+            ('users:logout', None),
+            ('users:signup', None),
         )
     
 
@@ -53,10 +55,10 @@ class TestRoutes(TestCase):
                     self.assertEqual(response.status_code, status)
 
     def test_redirect_for_anonymous_client(self):
-        login_url = reverse('yanote:login')
+        login_url = reverse('users:login')
         for name in ('notes:edit', 'notes:delete'):
             with self.subTest(name=name):
                 url = reverse(name, args=(self.note.slug,))
-                redirect_url = f'{login_url}&next={url}'
+                redirect_url = f'{login_url}?next={url}'
                 response = self.client.get(url)
                 self.assertRedirects(response, redirect_url)
