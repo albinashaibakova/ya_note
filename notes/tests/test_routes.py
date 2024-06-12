@@ -23,17 +23,13 @@ class TestRoutes(TestCase):
                                        author = cls.author)
         
 
-    def test_page_availability(self):
-
-        
+    def test_page_availability_for_anonymous_user(self):
         urls = (
             ('notes:home', None),
-            ('notes:detail', (self.note.slug,)),
             ('users:login', None),
             ('users:logout', None),
             ('users:signup', None),
         )
-    
 
         for name, args in urls:
             with self.subTest(name=name):
@@ -41,16 +37,18 @@ class TestRoutes(TestCase):
                 response = self.client.get(url)
                 self.assertEqual(response.status_code, HTTPStatus.OK)
 
-    def test_page_availability_for_edit_and_delete_note(self):
+
+
+    def test_availability_for_different_users(self):
         users_statuses = (
                 (self.author, HTTPStatus.OK),
                 (self.reader, HTTPStatus.NOT_FOUND),
             )
         for user, status in users_statuses:
             self.client.force_login(user)
-            for name in ('notes:edit', 'notes:delete'):
+            for name in ('notes:edit', 'notes:delete', 'notes:detail'):
                 with self.subTest(user=user, name=name):
-                    url = reverse(name, args=(self.note.id,))
+                    url = reverse(name, args=(self.note.slug,))
                     response = self.client.get(url)
                     self.assertEqual(response.status_code, status)
 
